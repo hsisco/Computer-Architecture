@@ -30,26 +30,23 @@ class CPU:
     def ram_write(self, address):
         self.ram[address] = self.value
 
-    def LDI(self, v, i):
-        self.reg[self.index] = self.value
+    def LDI(self, i,v):
+        self.reg[i] = v
         self.pc += 3
 
-    def PRN(self,v, i):
-        self.value = self.reg[self.ram[self.pc + 1]]
-        print(self.value)
+    def PRN(self,i,v):
+        print(self.reg[i])
         self.pc += 2
 
-    def HLT(self, v, i):
+    def HLT(self, i,v):
         self.running = False
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-            # self.pc += 3
         elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
-            # self.pc += 3
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -58,9 +55,9 @@ class CPU:
         address = 0
         with open(fileName) as file:
             for line in file:
-                line = line.split('#')
+                line = line.split('#')[0].strip()
                 try:
-                    instruction = int(line[0], 2)
+                    instruction = int(line, 2)
                     self.ram[address] = instruction
                     address += 1
                 except ValueError:
@@ -68,6 +65,7 @@ class CPU:
 
     def MUL(self, reg_a, reg_b):
         self.alu('MUL', reg_a, reg_b)
+        self.pc += 3
 
     def trace(self):
         """
@@ -91,12 +89,14 @@ class CPU:
 
     def run(self):
         """Run the CPU"""
-        reg_a = self.ram[self.pc + 1]
-        reg_b = self.ram[self.pc + 2]
-        while self.running:
-            ir = self.ram[self.pc]
-            # try:
-            self.branch_table[ir](reg_a, reg_b)
-            self.pc += (ir >> 6) + 1
-            # except:
-            #     raise Exception(f"Unknown instruction: {self.ram[self.pc]}")
+        try:
+            while self.running:
+                reg_a = self.ram[self.pc + 1]
+                reg_b = self.ram[self.pc + 2]
+                ir = self.ram[self.pc]
+                if ir in self.branch_table:
+                    self.branch_table[ir](reg_a, reg_b)
+                else:
+                    self.pc += 1
+        except:
+            raise Exception(f"Unknown instruction: {self.ram[self.pc]}")
