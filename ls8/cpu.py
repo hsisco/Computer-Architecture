@@ -27,6 +27,9 @@ class CPU:
             0b00010001: self.RET
         }
 
+        # Set the stack pointer to R7
+        self.reg[7] = 0xF4
+
     # Should accept the address to read and return the value
     def ram_read(self, address):
         return self.ram[address]
@@ -35,15 +38,15 @@ class CPU:
     def ram_write(self, address):
         self.ram[address] = self.value
 
-    def LDI(self, i,v):
+    def LDI(self, i, v):
         self.reg[i] = v
         self.pc += 3
 
-    def PRN(self,i,v):
+    def PRN(self, i, v):
         print(self.reg[i])
         self.pc += 2
 
-    def HLT(self, i,v):
+    def HLT(self, i, v):
         self.running = False
 
     def MUL(self, reg_a, reg_b):
@@ -52,14 +55,14 @@ class CPU:
 
     def ADD(self, reg_a, reg_b):
         self.alu('ADD', reg_a, reg_b)
-
+      
     def PUSH(self, *args):
         self.reg[7] -= 1
         register_index = self.ram[self.pc + 1]
         self.ram[self.reg[7]] = self.reg[register_index]
         self.pc += 2
 
-    def POP(self, *args):
+    def POP(self, i, v):
         register_index = self.ram[self.pc + 1]
         self.reg[register_index] = self.ram[self.reg[7]]
         self.reg[7] += 1
@@ -81,7 +84,7 @@ class CPU:
         self.reg[7] += 1
         # Update program counter
         self.pc = address
-
+        
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
         if op == "ADD":
