@@ -19,8 +19,13 @@ class CPU:
             0b10000010: self.LDI,
             0b01000111: self.PRN,
             0b00000001: self.HLT,
-            0b10100010: self.MUL
+            0b10100010: self.MUL,
+            0b01000101: self.PUSH,
+            0b01000110: self.POP
         }
+
+        # Set the stack pointer to R7
+        self.reg[7] = 0xF4
 
     # Should accept the address to read and return the value
     def ram_read(self, address):
@@ -30,16 +35,32 @@ class CPU:
     def ram_write(self, address):
         self.ram[address] = self.value
 
-    def LDI(self, i,v):
+    def LDI(self, i, v):
         self.reg[i] = v
         self.pc += 3
 
-    def PRN(self,i,v):
+    def PRN(self, i, v):
         print(self.reg[i])
         self.pc += 2
 
-    def HLT(self, i,v):
+    def HLT(self, i, v):
         self.running = False
+
+    def MUL(self, reg_a, reg_b):
+        self.alu('MUL', reg_a, reg_b)
+        self.pc += 3
+
+    def PUSH(self, *args):
+        self.reg[7] -= 1
+        register_index = self.ram[self.pc + 1]
+        self.ram[self.reg[7]] = self.reg[register_index]
+        self.pc += 2
+
+    def POP(self, i, v):
+        register_index = self.ram[self.pc + 1]
+        self.reg[register_index] = self.ram[self.reg[7]]
+        self.reg[7] += 1
+        self.pc += 2
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -62,10 +83,6 @@ class CPU:
                     address += 1
                 except ValueError:
                     continue
-
-    def MUL(self, reg_a, reg_b):
-        self.alu('MUL', reg_a, reg_b)
-        self.pc += 3
 
     def trace(self):
         """
