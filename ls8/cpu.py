@@ -35,15 +35,15 @@ class CPU:
     def ram_write(self, address):
         self.ram[address] = self.value
 
-    def LDI(self, i,v):
+    def LDI(self, i, v):
         self.reg[i] = v
         self.pc += 3
 
-    def PRN(self,i,v):
+    def PRN(self, i, v):
         print(self.reg[i])
         self.pc += 2
 
-    def HLT(self, i,v):
+    def HLT(self, *args):
         self.running = False
 
     def MUL(self, reg_a, reg_b):
@@ -65,7 +65,7 @@ class CPU:
         self.reg[7] += 1
         self.pc += 2
 
-    def CALL(self):
+    def CALL(self, *args):
         # Store next instruction in the stack
         self.reg[7] -= 1
         self.ram[self.reg[7]] = self.pc + 2
@@ -73,7 +73,7 @@ class CPU:
         register_index = self.ram[self.pc + 1]
         self.pc = self.reg[register_index]
 
-    def RET(self):
+    def RET(self, *args):
         # Pop from the stack
         address = self.ram[self.reg[7]]
         register_index = self.ram[self.pc + 1]
